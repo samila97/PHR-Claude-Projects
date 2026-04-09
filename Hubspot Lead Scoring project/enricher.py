@@ -181,8 +181,8 @@ class Enricher:
         Only called when Apollo and Google both failed to fill these fields.
         """
         props   = contact.get('properties', {})
-        company = props.get('company', '').strip()
-        email   = props.get('email', '')
+        company = (props.get('company') or '').strip()
+        email   = (props.get('email') or '')
         domain  = email.split('@')[1].lower() if email and '@' in email else ''
 
         if not company and not domain:

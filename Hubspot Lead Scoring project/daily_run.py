@@ -113,10 +113,17 @@ def main():
                 score_data['lead_score_label']
             )
 
-            # Build the update payload
+            # Build the update payload.
+            # 'industry' is a HubSpot enum field — it only accepts predefined
+            # internal values (e.g. FINANCIAL_SERVICES). Claude returns human-
+            # readable labels, so we use industry for scoring only and exclude
+            # it from the write-back to avoid a 400 error.
+            SKIP_WRITE = {'industry'}
+
             update_payload = {**score_data}
             if enriched_data:
-                update_payload.update(enriched_data)
+                writable = {k: v for k, v in enriched_data.items() if k not in SKIP_WRITE}
+                update_payload.update(writable)
                 update_payload['data_enriched'] = 'true'
 
             # Step 3 — write back to HubSpot
