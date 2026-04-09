@@ -1,3 +1,4 @@
+import datetime
 import time
 import requests
 
@@ -31,6 +32,46 @@ class HubSpotClient:
             contacts.extend(resp.get('results', []))
 
             after = resp.get('paging', {}).get('next', {}).get('after')
+            if not after:
+                break
+            time.sleep(0.1)
+
+        return contacts
+
+    def get_contacts_created_today(self):
+        """Return all contacts created today (midnight UTC → now), handling pagination."""
+        today_utc = datetime.datetime.utcnow().replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        today_ms = int(today_utc.timestamp() * 1000)
+
+        contacts, after = [], None
+        while True:
+            payload = {
+                'filterGroups': [{
+                    'filters': [{
+                        'propertyName': 'createdate',
+                        'operator': 'GTE',
+                        'value': str(today_ms)
+                    }]
+                }],
+                'properties': CONTACT_PROPERTIES,
+                'limit': 100,
+                'sorts': [{'propertyName': 'createdate', 'direction': 'DESCENDING'}]
+            }
+            if after:
+                payload['after'] = after
+
+            resp = requests.post(
+                f'{HUBSPOT_BASE}/crm/v3/objects/contacts/search',
+                headers=self.headers,
+                json=payload
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            contacts.extend(data.get('results', []))
+
+            after = data.get('paging', {}).get('next', {}).get('after')
             if not after:
                 break
             time.sleep(0.1)

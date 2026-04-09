@@ -1,0 +1,36 @@
+name: Daily Lead Scoring
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC every day
+  workflow_dispatch:        # allow manual trigger from GitHub UI
+
+jobs:
+  score-leads:
+    name: Enrich & Score New HubSpot Contacts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "Hubspot Lead Scoring project"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'Hubspot Lead Scoring project/requirements.txt'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run daily lead scoring
+        env:
+          HUBSPOT_TOKEN:  ${{ secrets.HUBSPOT_TOKEN }}
+          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CX:      ${{ secrets.GOOGLE_CX }}
+        run: python daily_run.py
