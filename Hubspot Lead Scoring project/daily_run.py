@@ -118,7 +118,7 @@ def main():
             # internal values (e.g. FINANCIAL_SERVICES). Claude returns human-
             # readable labels, so we use industry for scoring only and exclude
             # it from the write-back to avoid a 400 error.
-            SKIP_WRITE = {'industry'}
+            SKIP_WRITE = {'industry', 'numberofemployees'}
 
             update_payload = {**score_data}
             if enriched_data:

@@ -180,47 +180,34 @@ class Enricher:
         Use Claude to infer industry and/or employee count from company name / domain.
         Only called when Apollo and Google both failed to fill these fields.
         """
-        props   = contact.get('properties', {})
-        company = (props.get('company') or '').strip()
-        email   = (props.get('email') or '')
-        domain  = email.split('@')[1].lower() if email and '@' in email else ''
-
-        if not company and not domain:
-            return {}
-
-        # Build a compact context string for the prompt
-        context_lines = []
-        if company:
-            context_lines.append(f'Company name: {company}')
-        if domain:
-            context_lines.append(f'Email domain: {domain}')
-        context = '\n'.join(context_lines)
-
-        # Build the JSON schema dynamically — only request fields still missing
-        properties = {}
-        if 'industry' in missing_fields:
-            properties['industry'] = {
-                'type': 'string',
-                'description': 'Short industry label, e.g. Manufacturing, Retail, Banking'
-            }
-        if 'numberofemployees' in missing_fields:
-            properties['numberofemployees'] = {
-                'type': 'integer',
-                'description': 'Estimated total employee count'
-            }
-
-        fields_desc = ', '.join(
-            f'"{f}"' for f in ['industry', 'numberofemployees'] if f in missing_fields
-        )
-        prompt = (
-            f'Given the following company information, respond with ONLY a JSON object '
-            f'— no explanation, no markdown — inferring these fields: {fields_desc}. '
-            f'Omit any field you cannot confidently infer.\n\n'
-            f'{context}\n\n'
-            f'Example: {{"industry": "Manufacturing", "numberofemployees": 850}}'
-        )
-
         try:
+            props   = contact.get('properties', {})
+            company = (props.get('company') or '').strip()
+            email   = (props.get('email') or '')
+            domain  = email.split('@')[1].lower() if email and '@' in email else ''
+
+            if not company and not domain:
+                return {}
+
+            # Build a compact context string for the prompt
+            context_lines = []
+            if company:
+                context_lines.append(f'Company name: {company}')
+            if domain:
+                context_lines.append(f'Email domain: {domain}')
+            context = '\n'.join(context_lines)
+
+            fields_desc = ', '.join(
+                f'"{f}"' for f in ['industry', 'numberofemployees'] if f in missing_fields
+            )
+            prompt = (
+                f'Given the following company information, respond with ONLY a JSON object '
+                f'— no explanation, no markdown — inferring these fields: {fields_desc}. '
+                f'Omit any field you cannot confidently infer.\n\n'
+                f'{context}\n\n'
+                f'Example: {{"industry": "Manufacturing", "numberofemployees": 850}}'
+            )
+
             client   = anthropic.Anthropic(api_key=self.anthropic_key)
             response = client.messages.create(
                 model='claude-opus-4-6',
