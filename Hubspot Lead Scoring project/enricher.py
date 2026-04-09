@@ -1,8 +1,11 @@
 import json
+import logging
 import re
 import time
 import requests
 import anthropic
+
+log = logging.getLogger(__name__)
 
 FIELDS_TO_CHECK = ['jobtitle', 'industry', 'numberofemployees', 'email', 'phone']
 
@@ -26,20 +29,30 @@ class Enricher:
         """
         missing = self._missing_fields(contact)
         if not missing:
+            log.info('    Enrichment: all fields present — skipping')
             return {}
 
+        log.info('    Missing fields: %s', ', '.join(missing))
         enriched = {}
 
         # 1. Apollo (primary)
         apollo_data = self._apollo(contact)
+        if apollo_data:
+            log.info('    Apollo filled: %s', ', '.join(apollo_data))
+        else:
+            log.info('    Apollo: no data returned')
         enriched.update(apollo_data)
 
         # 2. Google Search (fallback for whatever Apollo couldn't fill)
-        temp_props = {**contact.get('properties', {}), **enriched}
+        temp_props    = {**contact.get('properties', {}), **enriched}
         still_missing = self._missing_fields({'properties': temp_props})
 
         if still_missing and self.google_key and self.google_cx:
             google_data = self._google(contact, still_missing)
+            if google_data:
+                log.info('    Google filled: %s', ', '.join(google_data))
+            else:
+                log.info('    Google: no data returned')
             enriched.update(google_data)
             time.sleep(0.5)   # stay inside free-tier rate limit
 
@@ -49,8 +62,17 @@ class Enricher:
         claude_targets = [f for f in still_missing2 if f in CLAUDE_FIELDS]
 
         if claude_targets and self.anthropic_key:
+            log.info('    Claude: inferring %s...', ', '.join(claude_targets))
             claude_data = self._claude(contact, claude_targets)
+            if claude_data:
+                log.info('    Claude filled: %s', ', '.join(claude_data))
+            else:
+                log.info('    Claude: could not infer fields')
             enriched.update(claude_data)
+        elif claude_targets and not self.anthropic_key:
+            log.info('    Claude: skipped (no ANTHROPIC_API_KEY)')
+        else:
+            log.info('    Claude: not needed (industry + employees already filled)')
 
         return enriched
 
@@ -190,33 +212,32 @@ class Enricher:
                 'description': 'Estimated total employee count'
             }
 
+        fields_desc = ', '.join(
+            f'"{f}"' for f in ['industry', 'numberofemployees'] if f in missing_fields
+        )
         prompt = (
-            f'Given the following company information, infer the requested fields.\n'
-            f'If you cannot make a reasonable inference for a field, omit it.\n\n'
-            f'{context}'
+            f'Given the following company information, respond with ONLY a JSON object '
+            f'— no explanation, no markdown — inferring these fields: {fields_desc}. '
+            f'Omit any field you cannot confidently infer.\n\n'
+            f'{context}\n\n'
+            f'Example: {{"industry": "Manufacturing", "numberofemployees": 850}}'
         )
 
         try:
             client   = anthropic.Anthropic(api_key=self.anthropic_key)
             response = client.messages.create(
                 model='claude-opus-4-6',
-                max_tokens=256,
-                messages=[{'role': 'user', 'content': prompt}],
-                output_config={
-                    'format': {
-                        'type': 'json_schema',
-                        'schema': {
-                            'type': 'object',
-                            'properties': properties,
-                            'additionalProperties': False
-                        }
-                    }
-                }
+                max_tokens=128,
+                messages=[{'role': 'user', 'content': prompt}]
             )
-            raw  = next(b.text for b in response.content if b.type == 'text')
-            data = json.loads(raw)
+            raw   = next(b.text for b in response.content if b.type == 'text').strip()
+            match = re.search(r'\{.*?\}', raw, re.DOTALL)
+            if not match:
+                log.warning('    Claude returned no JSON: %s', raw[:120])
+                return {}
+            data = json.loads(match.group())
         except Exception as e:
-            print(f'    Claude enrichment error: {e}')
+            log.error('    Claude enrichment error: %s', e)
             return {}
 
         result = {}
