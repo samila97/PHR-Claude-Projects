@@ -1,11 +1,8 @@
 import json
-import logging
 import re
 import time
 import requests
 import anthropic
-
-log = logging.getLogger(__name__)
 
 FIELDS_TO_CHECK = ['jobtitle', 'industry', 'numberofemployees', 'email', 'phone']
 
@@ -29,18 +26,18 @@ class Enricher:
         """
         missing = self._missing_fields(contact)
         if not missing:
-            log.info('    Enrichment: all fields present — skipping')
+            print('    Enrichment: all fields present — skipping')
             return {}
 
-        log.info('    Missing fields: %s', ', '.join(missing))
+        print(f'    Missing fields: {", ".join(missing)}')
         enriched = {}
 
         # 1. Apollo (primary)
         apollo_data = self._apollo(contact)
         if apollo_data:
-            log.info('    Apollo filled: %s', ', '.join(apollo_data))
+            print(f'    Apollo filled: {", ".join(apollo_data)}')
         else:
-            log.info('    Apollo: no data returned')
+            print('    Apollo: no data returned')
         enriched.update(apollo_data)
 
         # 2. Google Search (fallback for whatever Apollo couldn't fill)
@@ -50,9 +47,9 @@ class Enricher:
         if still_missing and self.google_key and self.google_cx:
             google_data = self._google(contact, still_missing)
             if google_data:
-                log.info('    Google filled: %s', ', '.join(google_data))
+                print(f'    Google filled: {", ".join(google_data)}')
             else:
-                log.info('    Google: no data returned')
+                print('    Google: no data returned')
             enriched.update(google_data)
             time.sleep(0.5)   # stay inside free-tier rate limit
 
@@ -62,17 +59,17 @@ class Enricher:
         claude_targets = [f for f in still_missing2 if f in CLAUDE_FIELDS]
 
         if claude_targets and self.anthropic_key:
-            log.info('    Claude: inferring %s...', ', '.join(claude_targets))
+            print(f'    Claude: inferring {", ".join(claude_targets)}...')
             claude_data = self._claude(contact, claude_targets)
             if claude_data:
-                log.info('    Claude filled: %s', ', '.join(claude_data))
+                print(f'    Claude filled: {", ".join(claude_data)}')
             else:
-                log.info('    Claude: could not infer fields')
+                print('    Claude: could not infer fields')
             enriched.update(claude_data)
         elif claude_targets and not self.anthropic_key:
-            log.info('    Claude: skipped (no ANTHROPIC_API_KEY)')
+            print('    Claude: skipped (no ANTHROPIC_API_KEY)')
         else:
-            log.info('    Claude: not needed (industry + employees already filled)')
+            print('    Claude: not needed (industry + employees already filled)')
 
         return enriched
 
@@ -233,11 +230,11 @@ class Enricher:
             raw   = next(b.text for b in response.content if b.type == 'text').strip()
             match = re.search(r'\{.*?\}', raw, re.DOTALL)
             if not match:
-                log.warning('    Claude returned no JSON: %s', raw[:120])
+                print(f'    Claude returned no JSON: {raw[:120]}')
                 return {}
             data = json.loads(match.group())
         except Exception as e:
-            log.error('    Claude enrichment error: %s', e)
+            print(f'    Claude enrichment error: {e}')
             return {}
 
         result = {}
