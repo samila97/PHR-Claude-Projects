@@ -1,0 +1,494 @@
+﻿[
+    {
+        "index":  1,
+        "name":  "Mamsar Group",
+        "domain":  "www.mamsargroup.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  2,
+        "name":  "UNITED SERVICES AKCESS, INC. (AKCESS)",
+        "domain":  "unitedservices-akcess.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  11,
+        "name":  "Marilou Resort",
+        "domain":  "marilouresort.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  12,
+        "name":  "KEW Hotel",
+        "domain":  "kewhotel.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  14,
+        "name":  "coral-blue-oriental-villas-and-suites.mydirectstay.com",
+        "domain":  "coralbluevillascebu.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  15,
+        "name":  "Chateau by the Sea",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  16,
+        "name":  "Siargao Bleu Resort \u0026 Spa",
+        "domain":  "siargaobleu.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  17,
+        "name":  "Hyundai Motor Philippines Inc.",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  18,
+        "name":  "SANKO PLASTICS PHILIPPINES INC.",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  19,
+        "name":  "Surtec Philippines Inc.",
+        "domain":  "surtecphils.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  20,
+        "name":  "FUTABA Corporation of The Philippines",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  21,
+        "name":  "SEUNG JIN PRECISION Philippines Inc.",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  22,
+        "name":  "Epicurean Partners Exchange Inc",
+        "domain":  "roasters.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  23,
+        "name":  "Cogon Commercial Inc.",
+        "domain":  "cogon.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  24,
+        "name":  "Jesedai Telecom Inc.",
+        "domain":  "jesedai.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  25,
+        "name":  "Justright Healthcare Inc.",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  26,
+        "name":  "Creative Dishes",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  27,
+        "name":  "Monpac Global",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  28,
+        "name":  "DoubleSquare Networks Inc.",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  29,
+        "name":  "International Precision",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  30,
+        "name":  "UPSI Inc.",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  31,
+        "name":  "Musahamat Farms Inc.",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  32,
+        "name":  "Jadphil Inc.",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  33,
+        "name":  "Six In One Corporation",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  34,
+        "name":  "Presidential Communication office",
+        "domain":  "",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  35,
+        "name":  "HTLand, Inc.",
+        "domain":  "htland.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  36,
+        "name":  "Q-R Building Solutions",
+        "domain":  "quadrbs.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  37,
+        "name":  "TeleSynergy",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  38,
+        "name":  "Iloilo Mission Hospital",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  39,
+        "name":  "Budgeting Supermarket Inc.",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  40,
+        "name":  "CERES SUMMIT CORPORATION",
+        "domain":  "ceresummit.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  41,
+        "name":  "Diamond WaterEdge Resort",
+        "domain":  "diamondwateredgeresortboracay.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  42,
+        "name":  "Bans Resort",
+        "domain":  "bansbeachresort.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  43,
+        "name":  "Boracay Holiday Resort",
+        "domain":  "boracayholidayresort.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  44,
+        "name":  "Akelco",
+        "domain":  "akelco.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  45,
+        "name":  "Microtel Inn \u0026 Suites  by Wyndham Boracay",
+        "domain":  "microtel-boracay.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  46,
+        "name":  "Tirta Spa Boracay Island",
+        "domain":  "tirtaspa.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  47,
+        "name":  "Baracay Haven Suites",
+        "domain":  "boracayhaven-suites.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  48,
+        "name":  "Raffles Fairmont Makati Careers",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  49,
+        "name":  "LET X Integrated Resort",
+        "domain":  "letwestside.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  50,
+        "name":  "JLL",
+        "domain":  "jll.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  51,
+        "name":  "Denso Ten Solutions Philippines Corporation",
+        "domain":  "",
+        "missing":  "industry"
+    },
+    {
+        "index":  55,
+        "name":  "Communix",
+        "domain":  "communixinc.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  56,
+        "name":  "Makati Gospel Church",
+        "domain":  "mgc.org.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  57,
+        "name":  "toyotabicutan.com.ph",
+        "domain":  "toyotabicutan.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  58,
+        "name":  "aquaboracay.com.ph",
+        "domain":  "aquaboracay.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  60,
+        "name":  "",
+        "domain":  "hannibal.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  62,
+        "name":  "bountyagro.com.ph",
+        "domain":  "bountyagro.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  63,
+        "name":  "smwatsons.com",
+        "domain":  "smwatsons.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  64,
+        "name":  "The SM Store",
+        "domain":  "thesmstore.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  65,
+        "name":  "mundipharma.com.ph",
+        "domain":  "mundipharma.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  66,
+        "name":  "pal.com.ph",
+        "domain":  "pal.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  68,
+        "name":  "F.R.P. Philippines Corporation",
+        "domain":  "frpphils.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  69,
+        "name":  "Klad Sanitation Services",
+        "domain":  "kladsanitation.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  70,
+        "name":  "SolarTech Steel Fabrication Services,",
+        "domain":  "solartechgroup.net",
+        "missing":  "industry"
+    },
+    {
+        "index":  71,
+        "name":  "Lead Career Mover",
+        "domain":  "lcm.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  72,
+        "name":  "Mozcom",
+        "domain":  "mozcom.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  73,
+        "name":  "Province of Guimaras",
+        "domain":  "guimaras.gov.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  74,
+        "name":  "Metro Retail",
+        "domain":  "metroretail.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  75,
+        "name":  "amanahbank.gov.ph",
+        "domain":  "amanahbank.gov.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  76,
+        "name":  "WTEI",
+        "domain":  "wtei.biz",
+        "missing":  "industry"
+    },
+    {
+        "index":  78,
+        "name":  "Fuente Pension House",
+        "domain":  "fuentepensionhouse.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  79,
+        "name":  "domain.ph",
+        "domain":  "domain.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  81,
+        "name":  "Gmail support phone number +61~800~765~948 gmail phone number",
+        "domain":  "gmail.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  82,
+        "name":  "chinabank.com",
+        "domain":  "chinabank.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  83,
+        "name":  "Katunyings",
+        "domain":  "katunyings.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  84,
+        "name":  "Energynet",
+        "domain":  "energynet.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  85,
+        "name":  "pesoloan.ph",
+        "domain":  "pesoloan.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  86,
+        "name":  "The Black Bean",
+        "domain":  "theblackbean.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  87,
+        "name":  "Ardegal",
+        "domain":  "ardegal.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  88,
+        "name":  "easybiophils.com",
+        "domain":  "easybiophils.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  90,
+        "name":  "gdfi.ph",
+        "domain":  "gdfi.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  91,
+        "name":  "Fongshann",
+        "domain":  "fongshann.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  92,
+        "name":  "JILCF Sintang Paaralan",
+        "domain":  "jilcf.edu.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  93,
+        "name":  "findme.com.ph",
+        "domain":  "findme.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  94,
+        "name":  "morongstarhotel.com",
+        "domain":  "morongstarhotel.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  95,
+        "name":  "HG3 Construction",
+        "domain":  "hg3construction.com",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  96,
+        "name":  "PROBE Group",
+        "domain":  "probegroup.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  97,
+        "name":  "airspeed.com.ph",
+        "domain":  "airspeed.com.ph",
+        "missing":  "industry"
+    },
+    {
+        "index":  98,
+        "name":  "KEPCO Philippines Holdings Inc",
+        "domain":  "kepcophilippines.com",
+        "missing":  "industry"
+    },
+    {
+        "index":  99,
+        "name":  "dynamic.com.ph",
+        "domain":  "dynamic.com.ph",
+        "missing":  "industry, headcount"
+    },
+    {
+        "index":  100,
+        "name":  "Test Company",
+        "domain":  "gfejtf.com",
+        "missing":  "industry, headcount"
+    }
+]
