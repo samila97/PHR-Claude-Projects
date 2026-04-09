@@ -29,8 +29,9 @@ jobs:
 
       - name: Run daily lead scoring
         env:
-          HUBSPOT_TOKEN:  ${{ secrets.HUBSPOT_TOKEN }}
-          APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
-          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-          GOOGLE_CX:      ${{ secrets.GOOGLE_CX }}
+          HUBSPOT_TOKEN:    ${{ secrets.HUBSPOT_TOKEN }}
+          APOLLO_API_KEY:   ${{ secrets.APOLLO_API_KEY }}
+          GOOGLE_API_KEY:   ${{ secrets.GOOGLE_API_KEY }}
+          GOOGLE_CX:        ${{ secrets.GOOGLE_CX }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python daily_run.py

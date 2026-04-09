@@ -1,15 +1,21 @@
+import json
 import re
 import time
 import requests
+import anthropic
 
 FIELDS_TO_CHECK = ['jobtitle', 'industry', 'numberofemployees', 'email', 'phone']
 
+# Claude can infer these from a company name / email domain
+CLAUDE_FIELDS = {'industry', 'numberofemployees'}
+
 
 class Enricher:
-    def __init__(self, apollo_api_key, google_api_key, google_cx):
-        self.apollo_key  = apollo_api_key
-        self.google_key  = google_api_key
-        self.google_cx   = google_cx
+    def __init__(self, apollo_api_key, google_api_key, google_cx, anthropic_api_key=None):
+        self.apollo_key     = apollo_api_key
+        self.google_key     = google_api_key
+        self.google_cx      = google_cx
+        self.anthropic_key  = anthropic_api_key
 
     # ── public ───────────────────────────────────────────────────────────────
 
@@ -36,6 +42,15 @@ class Enricher:
             google_data = self._google(contact, still_missing)
             enriched.update(google_data)
             time.sleep(0.5)   # stay inside free-tier rate limit
+
+        # 3. Claude (fallback for industry / employee count only)
+        temp_props2    = {**contact.get('properties', {}), **enriched}
+        still_missing2 = self._missing_fields({'properties': temp_props2})
+        claude_targets = [f for f in still_missing2 if f in CLAUDE_FIELDS]
+
+        if claude_targets and self.anthropic_key:
+            claude_data = self._claude(contact, claude_targets)
+            enriched.update(claude_data)
 
         return enriched
 
@@ -136,6 +151,82 @@ class Enricher:
             m = re.search(r'(\d[\d,]+)\s*(?:employees|staff|people|workers)', combined)
             if m:
                 result['numberofemployees'] = int(m.group(1).replace(',', ''))
+
+        return result
+
+    # ── Claude ───────────────────────────────────────────────────────────────
+
+    def _claude(self, contact, missing_fields):
+        """
+        Use Claude to infer industry and/or employee count from company name / domain.
+        Only called when Apollo and Google both failed to fill these fields.
+        """
+        props   = contact.get('properties', {})
+        company = props.get('company', '').strip()
+        email   = props.get('email', '')
+        domain  = email.split('@')[1].lower() if email and '@' in email else ''
+
+        if not company and not domain:
+            return {}
+
+        # Build a compact context string for the prompt
+        context_lines = []
+        if company:
+            context_lines.append(f'Company name: {company}')
+        if domain:
+            context_lines.append(f'Email domain: {domain}')
+        context = '\n'.join(context_lines)
+
+        # Build the JSON schema dynamically — only request fields still missing
+        properties = {}
+        if 'industry' in missing_fields:
+            properties['industry'] = {
+                'type': 'string',
+                'description': 'Short industry label, e.g. Manufacturing, Retail, Banking'
+            }
+        if 'numberofemployees' in missing_fields:
+            properties['numberofemployees'] = {
+                'type': 'integer',
+                'description': 'Estimated total employee count'
+            }
+
+        prompt = (
+            f'Given the following company information, infer the requested fields.\n'
+            f'If you cannot make a reasonable inference for a field, omit it.\n\n'
+            f'{context}'
+        )
+
+        try:
+            client   = anthropic.Anthropic(api_key=self.anthropic_key)
+            response = client.messages.create(
+                model='claude-opus-4-6',
+                max_tokens=256,
+                messages=[{'role': 'user', 'content': prompt}],
+                output_config={
+                    'format': {
+                        'type': 'json_schema',
+                        'schema': {
+                            'type': 'object',
+                            'properties': properties,
+                            'additionalProperties': False
+                        }
+                    }
+                }
+            )
+            raw  = next(b.text for b in response.content if b.type == 'text')
+            data = json.loads(raw)
+        except Exception as e:
+            print(f'    Claude enrichment error: {e}')
+            return {}
+
+        result = {}
+        if 'industry' in missing_fields and data.get('industry'):
+            result['industry'] = str(data['industry'])
+        if 'numberofemployees' in missing_fields and data.get('numberofemployees'):
+            try:
+                result['numberofemployees'] = int(data['numberofemployees'])
+            except (ValueError, TypeError):
+                pass
 
         return result
 

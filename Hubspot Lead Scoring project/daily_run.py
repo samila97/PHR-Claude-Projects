@@ -3,7 +3,7 @@ daily_run.py — Daily automated lead scoring workflow.
 
 Steps:
   1. Pull all HubSpot contacts created today (UTC)
-  2. Enrich each contact via Apollo + Google Search
+  2. Enrich each contact via Apollo → Google Search → Claude (fallback chain)
   3. Score each lead
   4. Write lead_score / lead_score_label / lead_score_breakdown back to HubSpot
 
@@ -11,7 +11,7 @@ Run:
   python daily_run.py
 
 Env vars required (set in GitHub Actions secrets or a local .env file):
-  HUBSPOT_TOKEN, APOLLO_API_KEY, GOOGLE_API_KEY, GOOGLE_CX
+  HUBSPOT_TOKEN, APOLLO_API_KEY, GOOGLE_API_KEY, GOOGLE_CX, ANTHROPIC_API_KEY
 """
 
 import logging
@@ -41,16 +41,18 @@ log = logging.getLogger(__name__)
 
 load_dotenv()
 
-HUBSPOT_TOKEN  = os.environ.get('HUBSPOT_TOKEN')
-APOLLO_API_KEY = os.environ.get('APOLLO_API_KEY')
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-GOOGLE_CX      = os.environ.get('GOOGLE_CX')
+HUBSPOT_TOKEN     = os.environ.get('HUBSPOT_TOKEN')
+APOLLO_API_KEY    = os.environ.get('APOLLO_API_KEY')
+GOOGLE_API_KEY    = os.environ.get('GOOGLE_API_KEY')
+GOOGLE_CX         = os.environ.get('GOOGLE_CX')
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY')
 
 MISSING = [name for name, val in {
-    'HUBSPOT_TOKEN':  HUBSPOT_TOKEN,
-    'APOLLO_API_KEY': APOLLO_API_KEY,
-    'GOOGLE_API_KEY': GOOGLE_API_KEY,
-    'GOOGLE_CX':      GOOGLE_CX,
+    'HUBSPOT_TOKEN':     HUBSPOT_TOKEN,
+    'APOLLO_API_KEY':    APOLLO_API_KEY,
+    'GOOGLE_API_KEY':    GOOGLE_API_KEY,
+    'GOOGLE_CX':         GOOGLE_CX,
+    'ANTHROPIC_API_KEY': ANTHROPIC_API_KEY,
 }.items() if not val]
 
 if MISSING:
@@ -66,7 +68,7 @@ def main():
     log.info('=' * 65)
 
     hubspot  = HubSpotClient(HUBSPOT_TOKEN)
-    enricher = Enricher(APOLLO_API_KEY, GOOGLE_API_KEY, GOOGLE_CX)
+    enricher = Enricher(APOLLO_API_KEY, GOOGLE_API_KEY, GOOGLE_CX, ANTHROPIC_API_KEY)
 
     # Step 1 — fetch contacts created today
     log.info('[1/3] Fetching contacts created today (UTC)...')
