@@ -3,7 +3,7 @@ name: Daily Lead Scoring
 on:
   schedule:
     - cron: '0 8 * * *'   # 08:00 UTC every day
-  workflow_dispatch:        # allow manual trigger from GitHub UI
+  workflow_dispatch:        # allow manual trigger from the GitHub Actions UI
 
 jobs:
   score-leads:
