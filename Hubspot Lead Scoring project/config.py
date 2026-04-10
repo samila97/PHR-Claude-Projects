@@ -65,11 +65,12 @@ JOBTITLE_NEGATIVE_KEYWORDS = [
     'graduate student', 'undergraduate', 'apprentice'
 ]
 
-JOBTITLE_SCORE_TIER1    = 25
-JOBTITLE_SCORE_TIER2    = 18
-JOBTITLE_SCORE_TIER3    = 12
-JOBTITLE_SCORE_OTHER    = 2
-JOBTITLE_SCORE_NEGATIVE = -15
+JOBTITLE_SCORE_TIER1    = 25   # C-suite HR/IT (CHRO, CPO, CTO, CIO, CEO)
+JOBTITLE_SCORE_TIER2    = 18   # VP / Director in HR or IT
+JOBTITLE_SCORE_TIER3    = 12   # Manager / Senior in HR or IT; any HR specialist
+JOBTITLE_SCORE_TIER4    = 6    # Junior HR/IT, or adjacent functions
+JOBTITLE_SCORE_OTHER    = 2    # Non-HR/IT roles
+JOBTITLE_SCORE_NEGATIVE = -15  # Student, intern, trainee, apprentice
 
 # ─────────────────────────────────────────────
 # CONTACT DATA QUALITY  (max 10 pts)

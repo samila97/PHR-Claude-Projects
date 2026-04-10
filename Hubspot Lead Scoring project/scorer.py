@@ -93,29 +93,88 @@ def score_company_size(num_employees):
         return config.COMPANY_SIZE_SCORE_SMB, f'SMB ({count:,} employees)'
 
 
-def score_job_title(title):
+def _classify_jobtitle_keywords(title):
+    """Keyword-based fallback classifier. Returns a tier string."""
+    val = title.lower()
+    for kw in config.JOBTITLE_NEGATIVE_KEYWORDS:
+        if kw in val:
+            return 'Negative'
+    for kw in config.JOBTITLE_TIER1_KEYWORDS:
+        if kw in val:
+            return 'Tier1'
+    for kw in config.JOBTITLE_TIER2_KEYWORDS:
+        if kw in val:
+            return 'Tier2'
+    for kw in config.JOBTITLE_TIER3_KEYWORDS:
+        if kw in val:
+            return 'Tier3'
+    return 'Other'
+
+
+def _classify_jobtitle_claude(title, api_key):
+    """
+    Use Claude to classify a job title by function (HR/IT relevance) and
+    seniority. Falls back to keyword matching if the API call fails.
+    """
+    prompt = (
+        f'Classify this job title for B2B lead scoring. '
+        f'We sell HR and workforce management software.\n\n'
+        f'Job title: "{title}"\n\n'
+        f'Categories:\n'
+        f'- Tier1: C-suite with HR, People, or IT focus — '
+        f'CHRO, Chief People Officer, CPO, CTO, CIO, CISO, '
+        f'or a CEO/CFO/COO who would sponsor an HR/IT purchase\n'
+        f'- Tier2: VP or Director level in HR, People, Talent, '
+        f'Recruitment, Benefits, Learning & Development, or IT\n'
+        f'- Tier3: Manager or Senior-level in HR/People/Talent/IT, '
+        f'OR any HR specialist regardless of seniority — '
+        f'Recruiter, HR Business Partner, Talent Acquisition, '
+        f'Benefits, Compensation, Payroll, L&D, People Ops, '
+        f'HR Generalist, Workforce, IT Manager\n'
+        f'- Tier4: Junior or entry-level HR/IT roles (Coordinator, '
+        f'Assistant, Analyst, Associate in HR or IT), '
+        f'OR adjacent functions (Procurement, Operations, Admin, Finance)\n'
+        f'- Negative: Student, intern, trainee, apprentice, '
+        f'graduate student, undergraduate\n'
+        f'- Other: Any role that does not fit the above\n\n'
+        f'Respond with ONLY one word — exactly one of: '
+        f'Tier1, Tier2, Tier3, Tier4, Negative, Other'
+    )
+    valid = {'Tier1', 'Tier2', 'Tier3', 'Tier4', 'Negative', 'Other'}
+    try:
+        client   = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=10,
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+        result = response.content[0].text.strip()
+        if result in valid:
+            return result
+        return _classify_jobtitle_keywords(title)
+    except Exception:
+        return _classify_jobtitle_keywords(title)
+
+
+def score_job_title(title, anthropic_api_key=None):
     if not title:
         return config.JOBTITLE_SCORE_OTHER, 'Unknown (no title)'
 
-    val = title.lower()
+    tier = (
+        _classify_jobtitle_claude(title, anthropic_api_key)
+        if anthropic_api_key
+        else _classify_jobtitle_keywords(title)
+    )
 
-    for kw in config.JOBTITLE_NEGATIVE_KEYWORDS:
-        if kw in val:
-            return config.JOBTITLE_SCORE_NEGATIVE, f'Negative — {title}'
-
-    for kw in config.JOBTITLE_TIER1_KEYWORDS:
-        if kw in val:
-            return config.JOBTITLE_SCORE_TIER1, f'Tier 1 — {title}'
-
-    for kw in config.JOBTITLE_TIER2_KEYWORDS:
-        if kw in val:
-            return config.JOBTITLE_SCORE_TIER2, f'Tier 2 — {title}'
-
-    for kw in config.JOBTITLE_TIER3_KEYWORDS:
-        if kw in val:
-            return config.JOBTITLE_SCORE_TIER3, f'Tier 3 — {title}'
-
-    return config.JOBTITLE_SCORE_OTHER, f'Other — {title}'
+    tier_map = {
+        'Tier1':    (config.JOBTITLE_SCORE_TIER1,    f'Tier 1 — {title}'),
+        'Tier2':    (config.JOBTITLE_SCORE_TIER2,    f'Tier 2 — {title}'),
+        'Tier3':    (config.JOBTITLE_SCORE_TIER3,    f'Tier 3 — {title}'),
+        'Tier4':    (config.JOBTITLE_SCORE_TIER4,    f'Tier 4 — {title}'),
+        'Other':    (config.JOBTITLE_SCORE_OTHER,    f'Other — {title}'),
+        'Negative': (config.JOBTITLE_SCORE_NEGATIVE, f'Negative — {title}'),
+    }
+    return tier_map.get(tier, (config.JOBTITLE_SCORE_OTHER, f'Other — {title}'))
 
 
 def score_contact_data(email, phone):
@@ -152,7 +211,7 @@ def calculate_score(contact, anthropic_api_key=None):
 
     ind_score,  ind_label  = score_industry(props.get('industry'), anthropic_api_key)
     size_score, size_label = score_company_size(props.get('numberofemployees'))
-    title_score, title_label = score_job_title(props.get('jobtitle'))
+    title_score, title_label = score_job_title(props.get('jobtitle'), anthropic_api_key)
     data_score, data_label = score_contact_data(props.get('email'), props.get('phone'))
 
     total = round(ind_score + size_score + title_score + data_score, 1)
