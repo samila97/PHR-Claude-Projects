@@ -38,12 +38,10 @@ class HubSpotClient:
 
         return contacts
 
-    def get_contacts_created_today(self):
-        """Return all contacts created today (midnight UTC → now), handling pagination."""
-        today_utc = datetime.datetime.utcnow().replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        today_ms = int(today_utc.timestamp() * 1000)
+    def get_contacts_created_last_24h(self):
+        """Return all contacts created in the last 24 hours (rolling window), handling pagination."""
+        since_utc = datetime.datetime.utcnow() - datetime.timedelta(hours=24)
+        today_ms  = int(since_utc.timestamp() * 1000)
 
         contacts, after = [], None
         while True:
@@ -105,6 +103,8 @@ class HubSpotClient:
             time.sleep(retry_after)
             resp = requests.patch(url, headers=self.headers, json={'properties': properties})
 
+        if not resp.ok:
+            print(f'    HubSpot error body: {resp.text}')
         resp.raise_for_status()
         return resp.json()
 

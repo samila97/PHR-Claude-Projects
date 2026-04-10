@@ -70,8 +70,8 @@ def main():
     enricher = Enricher(APOLLO_API_KEY, GOOGLE_API_KEY, GOOGLE_CX, ANTHROPIC_API_KEY)
 
     # Step 1 — fetch contacts created today
-    log.info('[1/3] Fetching contacts created today (UTC)...')
-    contacts = hubspot.get_contacts_created_today()
+    log.info('[1/3] Fetching contacts created in the last 24 hours...')
+    contacts = hubspot.get_contacts_created_last_24h()
     log.info('      %d contact(s) found', len(contacts))
 
     if not contacts:
