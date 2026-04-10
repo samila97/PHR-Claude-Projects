@@ -106,7 +106,7 @@ def main():
                 contact['properties'].update(enriched_data)
 
             # Score on the (now enriched) data
-            score_data = calculate_score(contact)
+            score_data = calculate_score(contact, ANTHROPIC_API_KEY)
             log.info(
                 '  Score: %s → %s',
                 score_data['lead_score'],

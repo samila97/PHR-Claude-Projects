@@ -1,29 +1,79 @@
+import anthropic
 import config
 
 
-def score_industry(industry):
+def _classify_industry_keywords(industry):
+    """Keyword-based fallback classifier. Returns a tier string."""
+    val = industry.lower()
+    for kw in config.INDUSTRY_EDUCATION_KEYWORDS:
+        if kw in val:
+            return 'Education'
+    for kw in config.INDUSTRY_TIER1_KEYWORDS:
+        if kw in val:
+            return 'Tier1'
+    for kw in config.INDUSTRY_TIER2_KEYWORDS:
+        if kw in val:
+            return 'Tier2'
+    for kw in config.INDUSTRY_TIER3_KEYWORDS:
+        if kw in val:
+            return 'Tier3'
+    return 'Other'
+
+
+def _classify_industry_claude(industry, api_key):
+    """
+    Ask Claude to map a raw industry string to a scoring tier.
+    Falls back to keyword matching if the API call fails.
+    """
+    prompt = (
+        f'Classify this company industry into exactly one scoring category.\n\n'
+        f'Industry: "{industry}"\n\n'
+        f'Categories:\n'
+        f'- Tier1: Manufacturing, Production, Food & Beverage, FMCG, Hospitality, '
+        f'Hotels, Resorts, BPO, Business Process Outsourcing\n'
+        f'- Tier2: Retail, E-commerce, Transportation, Logistics, Supply Chain, '
+        f'Freight, Shipping, Courier\n'
+        f'- Tier3: Banking, Finance, Financial Services, Insurance, Healthcare, '
+        f'Medical, Pharmaceutical, Hospitals\n'
+        f'- Education: Schools, Universities, Colleges, E-learning, EdTech, '
+        f'Training institutions\n'
+        f'- Other: Anything that does not fit the above\n\n'
+        f'Respond with ONLY one word — exactly one of: Tier1, Tier2, Tier3, Education, Other'
+    )
+    try:
+        client   = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=10,
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+        result = response.content[0].text.strip()
+        if result in ('Tier1', 'Tier2', 'Tier3', 'Education', 'Other'):
+            return result
+        # Unexpected response — fall back
+        return _classify_industry_keywords(industry)
+    except Exception:
+        return _classify_industry_keywords(industry)
+
+
+def score_industry(industry, anthropic_api_key=None):
     if not industry:
         return 0, 'Unknown (no industry)'
 
-    val = industry.lower()
+    tier = (
+        _classify_industry_claude(industry, anthropic_api_key)
+        if anthropic_api_key
+        else _classify_industry_keywords(industry)
+    )
 
-    for kw in config.INDUSTRY_EDUCATION_KEYWORDS:
-        if kw in val:
-            return config.INDUSTRY_SCORE_EDUCATION, f'Education ({industry})'
-
-    for kw in config.INDUSTRY_TIER1_KEYWORDS:
-        if kw in val:
-            return config.INDUSTRY_SCORE_TIER1, f'Tier 1 — {industry}'
-
-    for kw in config.INDUSTRY_TIER2_KEYWORDS:
-        if kw in val:
-            return config.INDUSTRY_SCORE_TIER2, f'Tier 2 — {industry}'
-
-    for kw in config.INDUSTRY_TIER3_KEYWORDS:
-        if kw in val:
-            return config.INDUSTRY_SCORE_TIER3, f'Tier 3 — {industry}'
-
-    return config.INDUSTRY_SCORE_OTHER, f'Other — {industry}'
+    tier_map = {
+        'Tier1':     (config.INDUSTRY_SCORE_TIER1,     f'Tier 1 — {industry}'),
+        'Tier2':     (config.INDUSTRY_SCORE_TIER2,     f'Tier 2 — {industry}'),
+        'Tier3':     (config.INDUSTRY_SCORE_TIER3,     f'Tier 3 — {industry}'),
+        'Education': (config.INDUSTRY_SCORE_EDUCATION, f'Education ({industry})'),
+        'Other':     (config.INDUSTRY_SCORE_OTHER,     f'Other — {industry}'),
+    }
+    return tier_map.get(tier, (config.INDUSTRY_SCORE_OTHER, f'Other — {industry}'))
 
 
 def score_company_size(num_employees):
@@ -97,10 +147,10 @@ def get_label(score):
     return config.LABEL_WEAK_FIT
 
 
-def calculate_score(contact):
+def calculate_score(contact, anthropic_api_key=None):
     props = contact.get('properties', {})
 
-    ind_score,  ind_label  = score_industry(props.get('industry'))
+    ind_score,  ind_label  = score_industry(props.get('industry'), anthropic_api_key)
     size_score, size_label = score_company_size(props.get('numberofemployees'))
     title_score, title_label = score_job_title(props.get('jobtitle'))
     data_score, data_label = score_contact_data(props.get('email'), props.get('phone'))
