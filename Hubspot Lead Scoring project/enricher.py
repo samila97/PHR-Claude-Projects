@@ -6,6 +6,41 @@ import anthropic
 
 FIELDS_TO_CHECK = ['jobtitle', 'industry', 'numberofemployees', 'email', 'phone']
 
+# HubSpot enum fields that need industry mapping
+INDUSTRY_ENUM_FIELDS = ['industry', 'industry_type', 'industry_category']
+
+
+def map_to_hubspot_enum(industry, options, api_key):
+    """
+    Use Claude to pick the closest HubSpot enum option for a raw industry string.
+    Returns the HubSpot internal value (e.g. 'FOOD_PRODUCTION'), or None if no match.
+    """
+    if not industry or not options:
+        return None
+
+    options_text = '\n'.join(f'- {o["label"]}' for o in options)
+    label_to_value = {o['label']: o['value'] for o in options}
+
+    prompt = (
+        f'Match this industry to the single closest option from the list below.\n\n'
+        f'Industry: "{industry}"\n\n'
+        f'Options:\n{options_text}\n\n'
+        f'Respond with ONLY the exact label text of the best match, nothing else.'
+    )
+
+    try:
+        client   = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model='claude-opus-4-6',
+            max_tokens=30,
+            messages=[{'role': 'user', 'content': prompt}]
+        )
+        label = response.content[0].text.strip().strip('"\'')
+        return label_to_value.get(label)
+    except Exception as e:
+        print(f'    Enum mapping error: {e}')
+        return None
+
 # Claude can infer these from a company name / email domain
 CLAUDE_FIELDS = {'industry', 'numberofemployees'}
 

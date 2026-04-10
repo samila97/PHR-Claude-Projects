@@ -6,8 +6,8 @@ HUBSPOT_BASE = 'https://api.hubapi.com'
 
 CONTACT_PROPERTIES = [
     'firstname', 'lastname', 'email', 'phone',
-    'jobtitle', 'industry', 'numberofemployees',
-    'company', 'website', 'lead_score', 'lead_score_label'
+    'jobtitle', 'industry', 'industry_type', 'industry_category',
+    'numberofemployees', 'company', 'website', 'lead_score', 'lead_score_label'
 ]
 
 
@@ -161,6 +161,22 @@ class HubSpotClient:
                     print(f"  Created property: {prop['label']}")
             except requests.HTTPError as e:
                 print(f"  Warning: could not create '{prop['label']}': {e}")
+
+    def get_property_options(self, property_name):
+        """
+        Return the enum options for a contact property as a list of
+        {'label': ..., 'value': ...} dicts. Returns [] if the property
+        doesn't exist or has no options.
+        """
+        try:
+            data = self._get(f'/crm/v3/properties/contacts/{property_name}')
+            return [
+                {'label': o['label'], 'value': o['value']}
+                for o in data.get('options', [])
+                if o.get('label') and o.get('value')
+            ]
+        except Exception:
+            return []
 
     # ── private helpers ──────────────────────────────────────────────────────
 

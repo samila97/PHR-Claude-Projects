@@ -22,7 +22,7 @@ import time
 from dotenv import load_dotenv
 
 from hubspot_client import HubSpotClient
-from enricher import Enricher
+from enricher import Enricher, INDUSTRY_ENUM_FIELDS, map_to_hubspot_enum
 from scorer import calculate_score
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -78,6 +78,15 @@ def main():
         log.info('No new contacts today — nothing to do.')
         return
 
+    # Fetch valid enum options for industry-related fields (once, before the loop)
+    log.info('      Loading HubSpot property options...')
+    field_options = {}
+    for field in INDUSTRY_ENUM_FIELDS:
+        opts = hubspot.get_property_options(field)
+        if opts:
+            field_options[field] = opts
+            log.info('      %s: %d options', field, len(opts))
+
     # Step 2 & 3 — enrich → score → write back
     log.info('[2/3] Enriching and scoring %d contact(s)...', len(contacts))
 
@@ -114,17 +123,34 @@ def main():
             )
 
             # Build the update payload.
-            # 'industry' is a HubSpot enum field — it only accepts predefined
-            # internal values (e.g. FINANCIAL_SERVICES). Claude returns human-
-            # readable labels, so we use industry for scoring only and exclude
-            # it from the write-back to avoid a 400 error.
-            SKIP_WRITE = {'industry', 'numberofemployees'}
+            # Industry enum fields are handled separately via Claude mapping.
+            # numberofemployees is written directly only if currently blank.
+            SKIP_WRITE = {'industry', 'industry_type', 'industry_category', 'numberofemployees'}
 
             update_payload = {**score_data}
             if enriched_data:
                 writable = {k: v for k, v in enriched_data.items() if k not in SKIP_WRITE}
                 update_payload.update(writable)
                 update_payload['data_enriched'] = 'true'
+
+            # numberofemployees — write if enriched and currently blank
+            emp = enriched_data.get('numberofemployees') if enriched_data else None
+            if emp and not props.get('numberofemployees'):
+                update_payload['numberofemployees'] = emp
+
+            # Industry enum fields — map enriched (or existing) industry to
+            # the closest valid HubSpot option, only for currently blank fields
+            industry_val = (
+                (enriched_data.get('industry') if enriched_data else None)
+                or props.get('industry') or ''
+            )
+            if industry_val and field_options:
+                for field, options in field_options.items():
+                    if not props.get(field):   # only fill blank fields
+                        mapped = map_to_hubspot_enum(industry_val, options, ANTHROPIC_API_KEY)
+                        if mapped:
+                            update_payload[field] = mapped
+                            log.info('  Mapped %s → %s', field, mapped)
 
             # Step 3 — write back to HubSpot
             hubspot.update_contact(contact_id, update_payload)
